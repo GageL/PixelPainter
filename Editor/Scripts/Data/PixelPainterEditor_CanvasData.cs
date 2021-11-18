@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace LucasIndustries.Editor {
+namespace LucasIndustries.PixelPainter.Editor {
 	[Serializable]
 	public class PixelPainterEditor_CanvasData {
 		#region Public/Private Variables

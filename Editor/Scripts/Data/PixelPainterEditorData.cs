@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-namespace LucasIndustries.Editor {
+namespace LucasIndustries.PixelPainter.Editor {
 	[CreateAssetMenu(fileName = "PixelPainterEditorData", menuName = "Lucas Industries/PixelPainterEditorData", order = 1)]
 	public class PixelPainterEditorData : ScriptableObject {
 		#region Public/Private Variables

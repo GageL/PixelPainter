@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-namespace LucasIndustries.Editor {
+namespace LucasIndustries.PixelPainter.Editor {
 	public class PixelPainterEditorWindow : EditorWindow {
 		#region Public/Private Variables
 		public const string CompanyName = "Lucas Industries";
@@ -42,7 +42,7 @@ namespace LucasIndustries.Editor {
 			EditorUtility.SetDirty(CachedPixelPainterEditorData);
 		}
 		#endregion
-		
+
 		#region Callback Methods
 		private static void CacheCanvasWindowPixelDataPixels(PlayModeStateChange state) {
 			if (string.IsNullOrEmpty(CachedPixelPainterEditorData.CanvasWindowData.CurrentCanvasGuid) || string.IsNullOrEmpty(CachedPixelPainterEditorData.CanvasWindowData.SelectedCanvasGuid)) {

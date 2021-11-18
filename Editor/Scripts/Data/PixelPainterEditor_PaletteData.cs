@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-namespace LucasIndustries.Editor {
+namespace LucasIndustries.PixelPainter.Editor {
 	[Serializable]
 	public class PixelPainterEditor_PaletteData {
 		#region Public/Private Variables

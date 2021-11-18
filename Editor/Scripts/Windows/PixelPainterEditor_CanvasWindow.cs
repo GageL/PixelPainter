@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Linq;
 
-namespace LucasIndustries.Editor {
+namespace LucasIndustries.PixelPainter.Editor {
 	public class PixelPainterEditor_CanvasWindow {
 		#region Public/Private Variables
 
@@ -55,6 +55,16 @@ namespace LucasIndustries.Editor {
 
 		public static PixelPainterEditor_CanvasData GetCanvasData(string guid) {
 			return GetCanvasWindowData().Canvases.FirstOrDefault(x => x.Guid == guid);
+		}
+
+		private static bool IsEvenNumber(int value) {
+			bool result = false;
+			if (value % 2 == 0) {
+				result = true;
+			} else {
+				result = false;
+			}
+			return result;
 		}
 
 		private static void DrawSplashGUI() {
@@ -194,11 +204,11 @@ namespace LucasIndustries.Editor {
 						{
 							bool _yWasLastEven;
 							for (int y = 1; y < GetCanvasData(GetCanvasWindowDataGuid()).CanvasHeight + 1; y++) { //Height
-								_yWasLastEven = LucasIndustries.Runtime.StaticUtilities.IsEvenNumber(y);
+								_yWasLastEven = IsEvenNumber(y);
 								EditorGUILayout.BeginHorizontal();
 								{
 									for (int x = 1; x < GetCanvasData(GetCanvasWindowDataGuid()).CanvasWidth + 1; x++) { //Width
-										bool _xIsEven = LucasIndustries.Runtime.StaticUtilities.IsEvenNumber(x);
+										bool _xIsEven = IsEvenNumber(x);
 										GUIStyle _xStyle;
 										if (_yWasLastEven) {
 											_xStyle = _xIsEven ? GetSkinStyle("CanvasWindowPainterPixelEven") : GetSkinStyle("CanvasWindowPainterPixelOdd");

@@ -7,259 +7,318 @@ using UnityEditor;
 using System.Linq;
 
 namespace LucasIndustries.PixelPainter.Editor {
-	public class PixelPainterEditor_CanvasWindow {
-		#region Public/Private Variables
+    public class PixelPainterEditor_CanvasWindow {
+        #region Public/Private Variables
 
-		#endregion
+        #endregion
 
-		#region Runtime Variables
+        #region Runtime Variables
 
-		#endregion
+        #endregion
 
-		#region Native Methods
+        #region Native Methods
 
-		#endregion
+        #endregion
 
-		#region Callback Methods
+        #region Callback Methods
 
-		#endregion
+        #endregion
 
-		#region Static Methods
-		public static void DrawWindow() {
-			Rect _rect = EditorGUILayout.BeginVertical(GetSkinStyle("Backdrop"));
-			{
-				if (!string.IsNullOrEmpty(GetCanvasWindowData().CurrentCanvasGuid) && GetCanvasWindowData().CurrentCanvasGuid == GetCanvasWindowData().SelectedCanvasGuid) {
-					DrawCurrentCanvasGUI();
-				} else {
-					DrawSplashGUI();
-					if (GUI.Button(_rect, "", GUIStyle.none)) {
-						GetCanvasWindowData().SelectedCanvasGuid = string.Empty;
-						GUI.FocusControl(null);
-					}
-				}
-			}
-			EditorGUILayout.EndVertical();
-		}
+        #region Static Methods
+        public static void DrawWindow() {
+            Rect _rect = EditorGUILayout.BeginVertical(GetSkinStyle("Backdrop"));
+            {
+                if (!string.IsNullOrEmpty(GetCanvasWindowData().CurrentCanvasGuid) && GetCanvasWindowData().CurrentCanvasGuid == GetCanvasWindowData().SelectedCanvasGuid) {
+                    DrawCurrentCanvasGUI();
+                } else {
+                    DrawSplashGUI();
+                    if (GUI.Button(_rect, "", GUIStyle.none)) {
+                        GetCanvasWindowData().SelectedCanvasGuid = string.Empty;
+                        GUI.FocusControl(null);
+                    }
+                }
+            }
+            EditorGUILayout.EndVertical();
+        }
 
-		public static PixelPainterEditor_CanvasWindowData GetCanvasWindowData() {
-			return PixelPainterEditorWindow.CachedPixelPainterEditorData.CanvasWindowData;
-		}
+        public static PixelPainterEditorData GetEditorData() {
+            return PixelPainterEditorWindow.CachedPixelPainterEditorData;
+        }
 
-		public static string GetCanvasWindowDataGuid() {
-			return GetCanvasWindowData().CurrentCanvasGuid;
-		}
+        public static PixelPainterEditor_CanvasWindowData GetCanvasWindowData() {
+            return PixelPainterEditorWindow.CachedPixelPainterEditorData.CanvasWindowData;
+        }
 
-		public static GUIStyle GetSkinStyle(string style) {
-			return PixelPainterEditorWindow.CachedPixelPainterEditorData.EditorSkin.GetStyle(style);
-		}
+        public static string GetCanvasWindowDataGuid() {
+            return GetCanvasWindowData().CurrentCanvasGuid;
+        }
 
-		public static PixelPainterEditor_CanvasData GetCanvasData(string guid) {
-			return GetCanvasWindowData().Canvases.FirstOrDefault(x => x.Guid == guid);
-		}
+        public static GUIStyle GetSkinStyle(string style) {
+            return PixelPainterEditorWindow.CachedPixelPainterEditorData.EditorSkin.GetStyle(style);
+        }
 
-		private static bool IsEvenNumber(int value) {
-			bool result = false;
-			if (value % 2 == 0) {
-				result = true;
-			} else {
-				result = false;
-			}
-			return result;
-		}
+        public static PixelPainterEditor_CanvasData GetCanvasData(string guid) {
+            return GetCanvasWindowData().Canvases.FirstOrDefault(x => x.Guid == guid);
+        }
 
-		private static void DrawSplashGUI() {
-			EditorGUILayout.BeginHorizontal();
-			{
-				GUILayout.FlexibleSpace();
-				EditorGUILayout.BeginVertical();
-				{
-					GUILayout.FlexibleSpace();
-					EditorGUILayout.LabelField("Welcome to Pixel Painter", GetSkinStyle("CanvasWindowSplashLabelHeader"));
-					GUILayout.Space(12);
-					EditorGUILayout.LabelField("··   · «  ∞  » ·   ··", GetSkinStyle("CanvasWindowSplashLabelHeader"));
-					GUILayout.Space(24);
-					EditorGUILayout.LabelField("« You can create a new canvas »", GetSkinStyle("CanvasWindowSplashLabelBody"));
-					GUILayout.Space(6);
-					EditorGUILayout.BeginVertical(GetSkinStyle("CanvasWindowSplashNewCanvasHolder"), GUILayout.Width(300));
-					{
-						GUILayout.Space(6);
-						EditorGUILayout.BeginHorizontal(GUILayout.Height(24));
-						{
-							EditorGUILayout.LabelField("Name:", GetSkinStyle("CanvasWindowSplashNewCanvasParam"), GUILayout.Width(84));
-							GetCanvasWindowData().NewCanvasName = EditorGUILayout.TextField(GetCanvasWindowData().NewCanvasName, GetSkinStyle("CanvasWindowSplashNewCanvasField"), GUILayout.ExpandWidth(true));
-						}
-						EditorGUILayout.EndHorizontal();
-						GUILayout.Space(4);
-						EditorGUILayout.BeginHorizontal(GUILayout.Height(24));
-						{
-							EditorGUILayout.LabelField("Width:", GetSkinStyle("CanvasWindowSplashNewCanvasParam"), GUILayout.Width(84));
-							GetCanvasWindowData().NewCanvasWidth = EditorGUILayout.IntField(GetCanvasWindowData().NewCanvasWidth, GetSkinStyle("CanvasWindowSplashNewCanvasField"), GUILayout.ExpandWidth(true));
-						}
-						EditorGUILayout.EndHorizontal();
-						GUILayout.Space(4);
-						EditorGUILayout.BeginHorizontal(GUILayout.Height(24));
-						{
-							EditorGUILayout.LabelField("Height:", GetSkinStyle("CanvasWindowSplashNewCanvasParam"), GUILayout.Width(84));
-							GetCanvasWindowData().NewCanvasHeight = EditorGUILayout.IntField(GetCanvasWindowData().NewCanvasHeight, GetSkinStyle("CanvasWindowSplashNewCanvasField"), GUILayout.ExpandWidth(true));
-						}
-						EditorGUILayout.EndHorizontal();
-						GUILayout.Space(6);
-					}
-					EditorGUILayout.EndVertical();
-					GUILayout.Space(6);
-					if (GUILayout.Button("Create", GetSkinStyle("CanvasWindowSplashButtonCreate"))) {
-						if (string.IsNullOrEmpty(GetCanvasWindowData().NewCanvasName)) {
-							EditorUtility.DisplayDialog("Create Error", "Each canvas needs a name", "Ok");
-							return;
-						}
-						if (GetCanvasWindowData().NewCanvasWidth < 2) {
-							EditorUtility.DisplayDialog("Create Error", "The canvas must be 2 or more pixels wide", "Close");
-							return;
-						}
-						if (GetCanvasWindowData().NewCanvasHeight < 2) {
-							EditorUtility.DisplayDialog("Create Error", "The canvas must be 2 or more pixels tall", "Close");
-							return;
-						}
-						PixelPainterEditor_CanvasData _data = new PixelPainterEditor_CanvasData(GetCanvasWindowData().NewCanvasName, GetCanvasWindowData().NewCanvasWidth, GetCanvasWindowData().NewCanvasHeight);
-						GetCanvasWindowData().Canvases.Add(_data);
-						GetCanvasWindowData().ResetNewCanvasData();
-						GetCanvasWindowData().SelectedCanvasGuid = _data.Guid;
-						GetCanvasWindowData().CurrentCanvasGuid = _data.Guid;
-						GUI.FocusControl(null);
-					}
-					GUILayout.Space(24);
-					EditorGUILayout.LabelField("··   -   ··", GetSkinStyle("CanvasWindowSplashLabelBody"));
-					GUILayout.Space(24);
-					EditorGUILayout.LabelField("« or select an existing canvas »", GetSkinStyle("CanvasWindowSplashLabelBody"));
-					GUILayout.Space(6);
-					EditorGUILayout.BeginVertical(GetSkinStyle("CanvasWindowSplashCanvasesHolder"), GUILayout.Width(300), GUILayout.Height(200));
-					{
-						GUILayout.Space(6);
-						GetCanvasWindowData().ExistingCanvasesScroll = EditorGUILayout.BeginScrollView(GetCanvasWindowData().ExistingCanvasesScroll);
-						{
-							if (GetCanvasWindowData().Canvases.Count == 0) {
-								EditorGUILayout.LabelField("~ None exist ~", GetSkinStyle("CanvasWindowSplashLabelCanvasesEmpty"), GUILayout.ExpandWidth(true));
-							} else {
-								for (int i = 0; i < GetCanvasWindowData().Canvases.Count; i++) {
-									if (!string.IsNullOrEmpty(GetCanvasWindowData().Canvases[i].Guid)) {
-										if (GUILayout.Button(GetCanvasWindowData().Canvases[i].Name, GetCanvasWindowData().SelectedCanvasGuid == GetCanvasWindowData().Canvases[i].Guid ? GetSkinStyle("CanvasWindowSplashButtonCanvasesSelected") : GetSkinStyle("CanvasWindowSplashButtonCanvases"), GUILayout.ExpandWidth(true), GUILayout.Height(30))) {
-											GetCanvasWindowData().SelectedCanvasGuid = GetCanvasWindowData().Canvases[i].Guid;
-										}
-									} else {
-										EditorGUILayout.LabelField("Guid Invalid!", GetSkinStyle("CanvasWindowSplashLabelCanvasesError"), GUILayout.ExpandWidth(true));
-									}
-									if (i < GetCanvasWindowData().Canvases.Count - 1) {
-										GUILayout.Space(4);
-									}
-								}
-							}
-						}
-						EditorGUILayout.EndScrollView();
-						GUILayout.Space(6);
-					}
-					EditorGUILayout.EndVertical();
-					GUILayout.Space(6);
-					if (GUILayout.Button("Select", (!string.IsNullOrEmpty(GetCanvasWindowData().SelectedCanvasGuid) ? GetSkinStyle("CanvasWindowSplashButtonSelect") : GetSkinStyle("CanvasWindowSplashButtonSelectEmpty")))) {
-						if (!string.IsNullOrEmpty(GetCanvasWindowData().SelectedCanvasGuid)) {
-							GetCanvasWindowData().CurrentCanvasGuid = GetCanvasWindowData().SelectedCanvasGuid;
-						}
-					}
-					GUILayout.FlexibleSpace();
-				}
-				EditorGUILayout.EndVertical();
-				GUILayout.FlexibleSpace();
-			}
-			EditorGUILayout.EndHorizontal();
-		}
+        private static bool IsEvenNumber(int value) {
+            bool result = false;
+            if (value % 2 == 0) {
+                result = true;
+            } else {
+                result = false;
+            }
+            return result;
+        }
 
-		private static void DrawCurrentCanvasGUI() {
-			EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
-			{
-				DrawLeftCanvasGUI();
-				DrawCenterCanvasGUI();
-				DrawRightCanvasGUI();
-			}
-			EditorGUILayout.EndHorizontal();
-		}
+        private static void DrawSplashGUI() {
+            EditorGUILayout.BeginHorizontal();
+            {
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.BeginVertical();
+                {
+                    GUILayout.FlexibleSpace();
+                    EditorGUILayout.LabelField("Welcome to Pixel Painter", GetSkinStyle("CanvasWindowSplashLabelHeader"));
+                    GUILayout.Space(12);
+                    EditorGUILayout.LabelField("··   · «  ∞  » ·   ··", GetSkinStyle("CanvasWindowSplashLabelHeader"));
+                    GUILayout.Space(24);
+                    EditorGUILayout.LabelField("« You can create a new canvas »", GetSkinStyle("CanvasWindowSplashLabelBody"));
+                    GUILayout.Space(6);
+                    EditorGUILayout.BeginVertical(GetSkinStyle("CanvasWindowSplashNewCanvasHolder"), GUILayout.Width(300));
+                    {
+                        GUILayout.Space(6);
+                        EditorGUILayout.BeginHorizontal(GUILayout.Height(24));
+                        {
+                            EditorGUILayout.LabelField("Name:", GetSkinStyle("CanvasWindowSplashNewCanvasParam"), GUILayout.Width(84));
+                            GetCanvasWindowData().NewCanvasName = EditorGUILayout.TextField(GetCanvasWindowData().NewCanvasName, GetSkinStyle("CanvasWindowSplashNewCanvasField"), GUILayout.ExpandWidth(true));
+                        }
+                        EditorGUILayout.EndHorizontal();
+                        GUILayout.Space(4);
+                        EditorGUILayout.BeginHorizontal(GUILayout.Height(24));
+                        {
+                            EditorGUILayout.LabelField("Width:", GetSkinStyle("CanvasWindowSplashNewCanvasParam"), GUILayout.Width(84));
+                            GetCanvasWindowData().NewCanvasWidth = EditorGUILayout.IntField(GetCanvasWindowData().NewCanvasWidth, GetSkinStyle("CanvasWindowSplashNewCanvasField"), GUILayout.ExpandWidth(true));
+                        }
+                        EditorGUILayout.EndHorizontal();
+                        GUILayout.Space(4);
+                        EditorGUILayout.BeginHorizontal(GUILayout.Height(24));
+                        {
+                            EditorGUILayout.LabelField("Height:", GetSkinStyle("CanvasWindowSplashNewCanvasParam"), GUILayout.Width(84));
+                            GetCanvasWindowData().NewCanvasHeight = EditorGUILayout.IntField(GetCanvasWindowData().NewCanvasHeight, GetSkinStyle("CanvasWindowSplashNewCanvasField"), GUILayout.ExpandWidth(true));
+                        }
+                        EditorGUILayout.EndHorizontal();
+                        GUILayout.Space(6);
+                    }
+                    EditorGUILayout.EndVertical();
+                    GUILayout.Space(6);
+                    if (GUILayout.Button("Create", GetSkinStyle("CanvasWindowSplashButtonCreate"))) {
+                        if (string.IsNullOrEmpty(GetCanvasWindowData().NewCanvasName)) {
+                            EditorUtility.DisplayDialog("Create Error", "Each canvas needs a name", "Ok");
+                            return;
+                        }
+                        if (GetCanvasWindowData().NewCanvasWidth < 2) {
+                            EditorUtility.DisplayDialog("Create Error", "The canvas must be 2 or more pixels wide", "Close");
+                            return;
+                        }
+                        if (GetCanvasWindowData().NewCanvasHeight < 2) {
+                            EditorUtility.DisplayDialog("Create Error", "The canvas must be 2 or more pixels tall", "Close");
+                            return;
+                        }
+                        PixelPainterEditor_CanvasData _data = new PixelPainterEditor_CanvasData(GetCanvasWindowData().NewCanvasName, GetCanvasWindowData().NewCanvasWidth, GetCanvasWindowData().NewCanvasHeight);
+                        GetCanvasWindowData().Canvases.Add(_data);
+                        GetCanvasWindowData().ResetNewCanvasData();
+                        GetCanvasWindowData().SelectedCanvasGuid = _data.Guid;
+                        GetCanvasWindowData().CurrentCanvasGuid = _data.Guid;
+                        GUI.FocusControl(null);
+                    }
+                    GUILayout.Space(24);
+                    EditorGUILayout.LabelField("··   -   ··", GetSkinStyle("CanvasWindowSplashLabelBody"));
+                    GUILayout.Space(24);
+                    EditorGUILayout.LabelField("« or select an existing canvas »", GetSkinStyle("CanvasWindowSplashLabelBody"));
+                    GUILayout.Space(6);
+                    EditorGUILayout.BeginVertical(GetSkinStyle("CanvasWindowSplashCanvasesHolder"), GUILayout.Width(300), GUILayout.Height(200));
+                    {
+                        GUILayout.Space(6);
+                        GetCanvasWindowData().ExistingCanvasesScroll = EditorGUILayout.BeginScrollView(GetCanvasWindowData().ExistingCanvasesScroll);
+                        {
+                            if (GetCanvasWindowData().Canvases.Count == 0) {
+                                EditorGUILayout.LabelField("~ None exist ~", GetSkinStyle("CanvasWindowSplashLabelCanvasesEmpty"), GUILayout.ExpandWidth(true));
+                            } else {
+                                for (int i = 0; i < GetCanvasWindowData().Canvases.Count; i++) {
+                                    if (!string.IsNullOrEmpty(GetCanvasWindowData().Canvases[i].Guid)) {
+                                        if (GUILayout.Button(GetCanvasWindowData().Canvases[i].Name, GetCanvasWindowData().SelectedCanvasGuid == GetCanvasWindowData().Canvases[i].Guid ? GetSkinStyle("CanvasWindowSplashButtonCanvasesSelected") : GetSkinStyle("CanvasWindowSplashButtonCanvases"), GUILayout.ExpandWidth(true), GUILayout.Height(30))) {
+                                            GetCanvasWindowData().SelectedCanvasGuid = GetCanvasWindowData().Canvases[i].Guid;
+                                        }
+                                    } else {
+                                        EditorGUILayout.LabelField("Guid Invalid!", GetSkinStyle("CanvasWindowSplashLabelCanvasesError"), GUILayout.ExpandWidth(true));
+                                    }
+                                    if (i < GetCanvasWindowData().Canvases.Count - 1) {
+                                        GUILayout.Space(4);
+                                    }
+                                }
+                            }
+                        }
+                        EditorGUILayout.EndScrollView();
+                        GUILayout.Space(6);
+                    }
+                    EditorGUILayout.EndVertical();
+                    GUILayout.Space(6);
+                    if (GUILayout.Button("Select", (!string.IsNullOrEmpty(GetCanvasWindowData().SelectedCanvasGuid) ? GetSkinStyle("CanvasWindowSplashButtonSelect") : GetSkinStyle("CanvasWindowSplashButtonSelectEmpty")))) {
+                        if (!string.IsNullOrEmpty(GetCanvasWindowData().SelectedCanvasGuid)) {
+                            GetCanvasWindowData().CurrentCanvasGuid = GetCanvasWindowData().SelectedCanvasGuid;
+                        }
+                    }
+                    GUILayout.FlexibleSpace();
+                }
+                EditorGUILayout.EndVertical();
+                GUILayout.FlexibleSpace();
+            }
+            EditorGUILayout.EndHorizontal();
+        }
 
-		private static void DrawLeftCanvasGUI() {
-			EditorGUILayout.BeginVertical(GetSkinStyle("CanvasWindowPainterSidePanel"), GUILayout.Width(80), GUILayout.ExpandHeight(true));
-			{
-				EditorGUILayout.LabelField("x", GUILayout.Width(40));
-			}
-			EditorGUILayout.EndVertical();
-		}
+        private static void DrawCurrentCanvasGUI() {
+            EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+            {
+                DrawLeftCanvasGUI();
+                DrawCenterCanvasGUI();
+                DrawRightCanvasGUI();
+            }
+            EditorGUILayout.EndHorizontal();
+        }
 
-		static int _pixelSize = 24;
-		private static void DrawCenterCanvasGUI() {
-			EditorGUILayout.BeginVertical();
-			{
-				GUILayout.FlexibleSpace();
-				EditorGUILayout.BeginHorizontal();
-				{
-					GUILayout.FlexibleSpace();
-					EditorGUILayout.BeginVertical();
-					{
-						GetCanvasWindowData().CurrentCanvasScroll = EditorGUILayout.BeginScrollView(GetCanvasWindowData().CurrentCanvasScroll);
-						{
-							bool _yWasLastEven;
-							for (int y = 1; y < GetCanvasData(GetCanvasWindowDataGuid()).CanvasHeight + 1; y++) { //Height
-								_yWasLastEven = IsEvenNumber(y);
-								EditorGUILayout.BeginHorizontal();
-								{
-									for (int x = 1; x < GetCanvasData(GetCanvasWindowDataGuid()).CanvasWidth + 1; x++) { //Width
-										bool _xIsEven = IsEvenNumber(x);
-										GUIStyle _xStyle;
-										if (_yWasLastEven) {
-											_xStyle = _xIsEven ? GetSkinStyle("CanvasWindowPainterPixelEven") : GetSkinStyle("CanvasWindowPainterPixelOdd");
-										} else {
-											_xStyle = _xIsEven ? GetSkinStyle("CanvasWindowPainterPixelOdd") : GetSkinStyle("CanvasWindowPainterPixelEven");
-										}
-										PixelPainterEditor_CanvasPixelsData.PixelInfo _pixelInfo = GetCanvasData(GetCanvasWindowDataGuid()).PixelsData.Pixels.FirstOrDefault(p => p.XPixelPosition == x && p.YPixelPosition == y);
-										Event e = Event.current;
-										if (GUILayout.Button(_pixelInfo.CachedTexture != null ? new GUIContent(_pixelInfo.CachedTexture) : new GUIContent(""), _pixelInfo.CachedTexture != null ? GetSkinStyle("CanvasWindowPainterPixelFilled") : _xStyle, GUILayout.Width(_pixelSize), GUILayout.Height(_pixelSize))) {
-											if (e.button == 0) {
-												_pixelInfo.CacheTexture(Color.red, _pixelSize, _pixelSize);
-											}
-											if (e.button == 1) {
-												if (_pixelInfo.CachedTexture != null) {
-													_pixelInfo.Color = new Color(1, 1, 1, 0);
-													_pixelInfo.CachedTexture = null;
-													GC.Collect();
-												}
-											}
-										}
-									}
-								}
-								EditorGUILayout.EndHorizontal();
-							}
-						}
-						EditorGUILayout.EndScrollView();
-					}
-					EditorGUILayout.EndVertical();
-					GUILayout.FlexibleSpace();
-				}
-				EditorGUILayout.EndHorizontal();
-				GUILayout.FlexibleSpace();
-			}
-			EditorGUILayout.EndVertical();
-		}
+        private static void DrawLeftCanvasGUI() {
+            EditorGUILayout.BeginVertical(GetSkinStyle("CanvasWindowPainterSidePanel"), GUILayout.Width(80), GUILayout.ExpandHeight(true));
+            {
+                EditorGUILayout.BeginHorizontal();
+                {
+                    GUILayout.FlexibleSpace();
+                    EditorGUILayout.BeginVertical();
+                    {
+                        EditorGUILayout.BeginHorizontal();
+                        {
+                            if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_Pen"), "Pixel Pen"), GetSkinStyle("Backdrop"), GUILayout.Width(32), GUILayout.Height(32))) {
 
-		private static void DrawRightCanvasGUI() {
-			EditorGUILayout.BeginVertical(GetSkinStyle("CanvasWindowPainterSidePanel"), GUILayout.Width(240), GUILayout.ExpandHeight(true));
-			{
-				EditorGUILayout.LabelField("x", GUILayout.Width(240));
-			}
-			EditorGUILayout.EndVertical();
-		}
-		#endregion
+                            }
+                            GUILayout.Space(6);
+                            if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Mirror Paint"), GetSkinStyle("Backdrop"), GUILayout.Width(32), GUILayout.Height(32))) {
 
-		#region Public Methods
+                            }
+                        }
+                        EditorGUILayout.EndHorizontal();
+                        GUILayout.Space(6);
+                        EditorGUILayout.BeginHorizontal();
+                        {
+                            if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Save"), GetSkinStyle("Backdrop"), GUILayout.Width(32), GUILayout.Height(32))) {
+                                GetCanvasData(GetCanvasWindowDataGuid()).ExportToPNG();
+                            }
+                        }
+                        EditorGUILayout.EndHorizontal();
+                    }
+                    EditorGUILayout.EndVertical();
+                    GUILayout.FlexibleSpace();
+                }
+                EditorGUILayout.EndHorizontal();
+            }
+            EditorGUILayout.EndVertical();
+        }
 
-		#endregion
+        private static void DrawCenterCanvasGUI() {
+            EditorGUILayout.BeginVertical();
+            {
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.BeginHorizontal();
+                {
+                    GUILayout.FlexibleSpace();
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        bool _yWasLastEven;
+                        for (int x = 0; x < GetCanvasData(GetCanvasWindowDataGuid()).CanvasWidth; x++) {
+                            bool _xIsEven = IsEvenNumber(x);
+                            EditorGUILayout.BeginVertical();
+                            {
+                                for (int y = GetCanvasData(GetCanvasWindowDataGuid()).CanvasHeight - 1; y >= 0; y--) {
+                                    _yWasLastEven = IsEvenNumber(y);
+                                    Event e = Event.current;
+                                    GUIStyle _xStyle;
+                                    if (_yWasLastEven) {
+                                        _xStyle = _xIsEven ? GetSkinStyle("CanvasWindowPainterPixelEven") : GetSkinStyle("CanvasWindowPainterPixelOdd");
+                                    } else {
+                                        _xStyle = _xIsEven ? GetSkinStyle("CanvasWindowPainterPixelOdd") : GetSkinStyle("CanvasWindowPainterPixelEven");
+                                    }
+                                    PixelPainterEditor_CanvasPixelsData.PixelInfo _pixelInfo = GetCanvasData(GetCanvasWindowDataGuid()).PixelsData.Pixels.FirstOrDefault(p => p.XPixelPosition == x && p.YPixelPosition == y);
+                                    if (_pixelInfo != null) {
+                                        if (GUILayout.Button(_pixelInfo.CachedTexture != null ? new GUIContent(_pixelInfo.CachedTexture) : new GUIContent(""), _pixelInfo.CachedTexture != null ? GetSkinStyle("CanvasWindowPainterPixelFilled") : _xStyle, GUILayout.Width(GetEditorData().CanvasPixelSize), GUILayout.Height(GetEditorData().CanvasPixelSize))) {
+                                            if (e.button == 0) {
+                                                _pixelInfo.CacheTexture(Color.red, GetEditorData().CanvasPixelSize, GetEditorData().CanvasPixelSize);
+                                            }
+                                            if (e.button == 1) {
+                                                if (_pixelInfo.CachedTexture != null) {
+                                                    _pixelInfo.Color = new Color(1, 1, 1, 0);
+                                                    _pixelInfo.CachedTexture = null;
+                                                    GC.Collect();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            EditorGUILayout.EndHorizontal();
+                        }
+                    }
+                    EditorGUILayout.EndVertical();
+                    GUILayout.FlexibleSpace();
+                }
+                EditorGUILayout.EndHorizontal();
+                GUILayout.FlexibleSpace();
+            }
+            EditorGUILayout.EndVertical();
+        }
 
-		#region Private Methods
+        private static void DrawRightCanvasGUI() {
+            EditorGUILayout.BeginVertical(GetSkinStyle("CanvasWindowPainterSidePanel"), GUILayout.Width(240), GUILayout.ExpandHeight(true));
+            {
+                EditorGUILayout.BeginHorizontal();
+                {
+                    GUILayout.FlexibleSpace();
+                    EditorGUILayout.BeginVertical();
+                    {
+                        if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, ""), GetSkinStyle("Backdrop"), GUILayout.Width(220), GUILayout.Height(220))) {
 
-		#endregion
-	}
+                        }
+                        GUILayout.Space(6);
+                        EditorGUILayout.BeginVertical(GetSkinStyle("CanvasWindowPainterSidePanelContainer"), GUILayout.Width(220), GUILayout.Height(72));
+                        {
+                            EditorGUILayout.BeginVertical(GetSkinStyle("CanvasWindowPainterSidePanelTitleBox"), GUILayout.ExpandWidth(true), GUILayout.Height(24));
+                            {
+                                EditorGUILayout.LabelField("Area Title", GetSkinStyle("CanvasWindowPainterSidePanelTitleLabel"), GUILayout.ExpandWidth(true), GUILayout.Height(24));
+                            }
+                            EditorGUILayout.EndVertical();
+                            EditorGUILayout.BeginHorizontal();
+                            {
+                                if (GUILayout.Button("B", GUILayout.Width(24), GUILayout.Height(24))) {
+
+                                }
+                            }
+                            EditorGUILayout.EndHorizontal();
+
+                        }
+                        EditorGUILayout.EndVertical();
+                    }
+                    EditorGUILayout.EndVertical();
+                    GUILayout.FlexibleSpace();
+                }
+                EditorGUILayout.EndHorizontal();
+            }
+            EditorGUILayout.EndVertical();
+        }
+        #endregion
+
+        #region Public Methods
+
+        #endregion
+
+        #region Private Methods
+
+        #endregion
+    }
 }

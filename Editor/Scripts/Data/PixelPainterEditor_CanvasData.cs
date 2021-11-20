@@ -15,6 +15,8 @@ namespace LucasIndustries.PixelPainter.Editor {
         public int CanvasWidth;
         public int CanvasHeight;
         public PixelPainterEditor_CanvasPixelsData PixelsData;
+        public Color PrimaryPaintColor = Color.white;
+        public Color SecondaryPaintColor = Color.black;
         public string PaletteGuid;
         #endregion
 
@@ -76,11 +78,11 @@ namespace LucasIndustries.PixelPainter.Editor {
                 byte[] bytes = tex.EncodeToPNG();
                 UnityEngine.Object.DestroyImmediate(tex);
 
-                string _directory = Application.dataPath + $"/PixelPainter/Renders";
+                string _directory = Application.dataPath + $"/PixelPainter/Editor/Resources";
                 if (!Directory.Exists(_directory)) {
                     Directory.CreateDirectory(_directory);
                 }
-                File.WriteAllBytes($"{_directory}/{Name} [{Guid.Substring(0, 6)}].png", bytes);
+                File.WriteAllBytes($"{_directory}/{Name}.png", bytes);
 
                 AssetDatabase.Refresh();
             }

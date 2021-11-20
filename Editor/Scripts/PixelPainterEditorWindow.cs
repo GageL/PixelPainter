@@ -54,7 +54,7 @@ namespace LucasIndustries.PixelPainter.Editor {
 			if (state == PlayModeStateChange.EnteredEditMode || state == PlayModeStateChange.EnteredPlayMode) {
 				for (int i = 0; i < PixelPainterEditor_CanvasWindow.GetCanvasData(PixelPainterEditor_CanvasWindow.GetCanvasWindowDataGuid()).PixelsData.Pixels.Count; i++) {
 					if (PixelPainterEditor_CanvasWindow.GetCanvasData(PixelPainterEditor_CanvasWindow.GetCanvasWindowDataGuid()).PixelsData.Pixels[i].Color.a != 0) {
-						PixelPainterEditor_CanvasWindow.GetCanvasData(PixelPainterEditor_CanvasWindow.GetCanvasWindowDataGuid()).PixelsData.Pixels[i].CacheTexture(PixelPainterEditor_CanvasWindow.GetCanvasData(PixelPainterEditor_CanvasWindow.GetCanvasWindowDataGuid()).PixelsData.Pixels[i].Color, CachedPixelPainterEditorData.CanvasPixelSize, CachedPixelPainterEditorData.CanvasPixelSize);
+						PixelPainterEditor_CanvasWindow.GetCanvasData(PixelPainterEditor_CanvasWindow.GetCanvasWindowDataGuid()).PixelsData.Pixels[i].PaintPixel(PixelPainterEditor_CanvasWindow.GetCanvasData(PixelPainterEditor_CanvasWindow.GetCanvasWindowDataGuid()).PixelsData.Pixels[i].Color, CachedPixelPainterEditorData.CanvasPixelSize, CachedPixelPainterEditorData.CanvasPixelSize);
 					}
 				}
 			}

@@ -64,7 +64,7 @@ namespace LucasIndustries.PixelPainter.Editor {
 		#region Static Methods
 		[MenuItem(CompanyName + "/" + EditorName + "/Open")]
 		public static void OpenEditor() {
-			GetWindow<PixelPainterEditorWindow>(EditorName).Show();
+			GetWindow<PixelPainterEditorWindow>(true, EditorName).Show();
 			CacheEditorData();
 		}
 

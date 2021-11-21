@@ -16,7 +16,7 @@ namespace LucasIndustries.PixelPainter.Editor {
             public Texture2D CachedTexture;
 
             public void PaintPixel(Color color, int textureWidth, int textureHeight) {
-                    Color = color;
+                Color = color;
                 if (Color.a != 0) {
                     if (CachedTexture == null) {
                         CachedTexture = new Texture2D(textureWidth, textureHeight);
@@ -28,7 +28,6 @@ namespace LucasIndustries.PixelPainter.Editor {
                     Color = new Color(1, 1, 1, 0);
                     if (CachedTexture != null) {
                         CachedTexture = null;
-                        GC.Collect();
                     }
                 }
             }
@@ -63,6 +62,21 @@ namespace LucasIndustries.PixelPainter.Editor {
                         Color = new Color(1, 1, 1, 0)
                     });
                 }
+            }
+        }
+
+        public void ClearAllPixels() {
+            for (int i = 0; i < Pixels.Count; i++) {
+                Pixels[i].Color = new Color(1, 1, 1, 0);
+                if (Pixels[i].CachedTexture != null) {
+                    Pixels[i].CachedTexture = null;
+                }
+            }
+        }
+
+        public void FillAllPixels(Color color, int textureWidth, int textureHeight) {
+            for (int i = 0; i < Pixels.Count; i++) {
+                Pixels[i].PaintPixel(color, textureWidth, textureHeight);
             }
         }
         #endregion

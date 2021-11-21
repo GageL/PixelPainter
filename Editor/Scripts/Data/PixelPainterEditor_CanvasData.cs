@@ -17,7 +17,7 @@ namespace LucasIndustries.PixelPainter.Editor {
         public PixelPainterEditor_CanvasPixelsData PixelsData;
         public Color PrimaryPaintColor = Color.white;
         public Color SecondaryPaintColor = Color.black;
-        public string PaletteGuid;
+        public int SelectedPalette;
         #endregion
 
         #region Runtime Variables

@@ -2940,15 +2940,15 @@ MonoBehaviour:
     m_StretchHeight: 1
   - m_Name: CanvasWindowPainterSidePanelContainerButton
     m_Normal:
-      m_Background: {fileID: 2800000, guid: 156af385f19e2be46b8786f8356dfc44, type: 3}
+      m_Background: {fileID: 2800000, guid: bc4558d8ba244874f8e1e0f57ee107f1, type: 3}
       m_ScaledBackgrounds: []
       m_TextColor: {r: 1, g: 1, b: 1, a: 1}
     m_Hover:
-      m_Background: {fileID: 0}
+      m_Background: {fileID: 2800000, guid: adc133b0e82ef7c4494dfcdf7690e11d, type: 3}
       m_ScaledBackgrounds: []
       m_TextColor: {r: 1, g: 1, b: 1, a: 1}
     m_Active:
-      m_Background: {fileID: 0}
+      m_Background: {fileID: 2800000, guid: 8d8e06c789d1ddf42a95fe42a5cc0e1b, type: 3}
       m_ScaledBackgrounds: []
       m_TextColor: {r: 1, g: 1, b: 1, a: 1}
     m_Focused:

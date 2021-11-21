@@ -41,6 +41,11 @@ namespace LucasIndustries.PixelPainter.Editor {
 			ExistingCanvasesScroll = Vector2.zero;
 			CurrentCanvasScroll = Vector2.zero;
 		}
+
+		public void SetCanvasGuids(string selectedGuid, string currentGuid) {
+			SelectedCanvasGuid = selectedGuid;
+			CurrentCanvasGuid = currentGuid;
+        }
 		#endregion
 
 		#region Private Methods

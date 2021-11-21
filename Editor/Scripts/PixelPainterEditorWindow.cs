@@ -20,6 +20,7 @@ namespace LucasIndustries.PixelPainter.Editor {
 			EditorApplication.playModeStateChanged += CacheCanvasWindowPixelDataPixels;
 			if (CachedPixelPainterEditorData == null) {
 				CacheEditorData();
+				//CachedPixelPainterEditorData.CanvasWindowData.SetCanvasGuids(string.Empty, string.Empty); // Resets the window to splash
 			}
 		}
 
@@ -31,7 +32,7 @@ namespace LucasIndustries.PixelPainter.Editor {
 			PixelPainterEditorWindow _window = this;
 			GUI.skin = CachedPixelPainterEditorData.EditorSkin;
 
-			CachedPixelPainterEditorData.CurrentEvent = Event.current;
+			//Debug.Log(this.position.width + "." + this.position.height);
 			PixelPainterEditor_CanvasWindow.DrawWindow();
 
 			this.Repaint();
@@ -64,7 +65,11 @@ namespace LucasIndustries.PixelPainter.Editor {
 		#region Static Methods
 		[MenuItem(CompanyName + "/" + EditorName + "/Open")]
 		public static void OpenEditor() {
-			GetWindow<PixelPainterEditorWindow>(true, EditorName).Show();
+			PixelPainterEditorWindow _window = GetWindow<PixelPainterEditorWindow>(true);
+			_window.minSize = new Vector2(852, 592);
+			_window.maxSize = new Vector2(852, 592);
+			_window.titleContent = new GUIContent("Lucas Industries - Pixel Painter", Resources.Load<Texture2D>("Ed_Pen"));
+			_window.Show();
 			CacheEditorData();
 		}
 

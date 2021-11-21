@@ -11,7 +11,6 @@ namespace LucasIndustries.PixelPainter.Editor {
 		#region Public/Private Variables
 		private static string SaveFolder = "PixelPainter/Editor/Data/";
 
-		public Event CurrentEvent;
 		public GUISkin EditorSkin;
 		public PixelPainterEditor_CanvasWindowData CanvasWindowData;
 		public List<PixelPainterEditor_PaletteData> Palettes = new List<PixelPainterEditor_PaletteData>();

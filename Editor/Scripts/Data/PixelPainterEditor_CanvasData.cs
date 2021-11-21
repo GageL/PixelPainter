@@ -58,46 +58,46 @@ namespace LucasIndustries.PixelPainter.Editor {
 
         [Button()]
         public void DeleteCanvas() {
-            if (EditorUtility.DisplayDialog("Confirm", $"Are you sure you want to delete canvas: {Name}?", "Yes", "Cancel")) {
-                PixelPainterEditorWindow.CachedPixelPainterEditorData.CanvasWindowData.SelectedCanvasGuid = string.Empty;
-                PixelPainterEditorWindow.CachedPixelPainterEditorData.CanvasWindowData.CurrentCanvasGuid = string.Empty;
+            if (EditorUtility.DisplayDialog("Confirm", $"Are you sure you want to delete the canvas: {Name}?", "Yes", "Cancel")) {
+                PixelPainterEditorWindow.CachedPixelPainterEditorData.CanvasWindowData.SetCanvasGuids(string.Empty, string.Empty);
                 PixelPainterEditorWindow.CachedPixelPainterEditorData.CanvasWindowData.Canvases.Remove(this);
             }
         }
 
         [Button()]
         public void ExportToPNG() {
-            List<Color> _colors = new List<Color>();
-            for (int i = 0; i < PixelsData.Pixels.Count; i++) {
-                _colors.Add(PixelsData.Pixels[i].Color);
-            }
-            if (_colors.Count > 0) {
-                // Create a texture the size of the canvas, RGB24 format
-                int width = CanvasWidth;
-                int height = CanvasHeight;
-                Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false) {
-                    wrapMode = TextureWrapMode.Clamp,
-                    filterMode = FilterMode.Point
-                };
+            if (EditorUtility.DisplayDialog("Confirm", $"Do you want to export the canvas: {Name}?", "Yes", "Cancel")) {
+                string _path = EditorUtility.SaveFilePanelInProject("Export Path", Name, "png", "");
+                if (!string.IsNullOrEmpty(_path)) {
+                    List<Color> _colors = new List<Color>();
+                    for (int i = 0; i < PixelsData.Pixels.Count; i++) {
+                        _colors.Add(PixelsData.Pixels[i].Color);
+                    }
+                    if (_colors.Count > 0) {
+                        // Create a texture the size of the canvas, RGB24 format
+                        int width = CanvasWidth;
+                        int height = CanvasHeight;
+                        Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false) {
+                            wrapMode = TextureWrapMode.Clamp,
+                            filterMode = FilterMode.Point
+                        };
 
-                // Read canvas contents into the texture
-                tex.SetPixels(_colors.ToArray());
-                tex.Apply();
+                        // Read canvas contents into the texture
+                        tex.SetPixels(_colors.ToArray());
+                        tex.Apply();
 
-                // Need to flip right side up due to current pixel storage method
-                //tex = FlipTextureVertically(tex);
+                        // Need to flip right side up due to current pixel storage method
+                        //tex = FlipTextureVertically(tex);
 
-                // Encode texture into PNG
-                byte[] bytes = tex.EncodeToPNG();
-                UnityEngine.Object.DestroyImmediate(tex);
+                        // Encode texture into PNG
+                        byte[] bytes = tex.EncodeToPNG();
+                        UnityEngine.Object.DestroyImmediate(tex);
 
-                string _directory = Application.dataPath + $"/PixelPainter/Editor/Resources";
-                if (!Directory.Exists(_directory)) {
-                    Directory.CreateDirectory(_directory);
+                        File.WriteAllBytes(_path, bytes);
+
+                        AssetDatabase.Refresh();
+                    }
                 }
-                File.WriteAllBytes($"{_directory}/{Name}.png", bytes);
-
-                AssetDatabase.Refresh();
             }
         }
         #endregion

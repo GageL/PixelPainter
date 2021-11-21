@@ -1,0 +1,9 @@
+Icons:
+
+
+==========================
+
+Todo:
+	need to add texture => pixel data reader
+need to add frames
+need to add undo/redo buffer for all actions

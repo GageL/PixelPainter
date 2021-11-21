@@ -46,10 +46,23 @@ namespace LucasIndustries.PixelPainter.Editor {
         }
 
         [Button()]
+        public void DuplicateCanvas() {
+            if (EditorUtility.DisplayDialog("Confirm", $"Are you sure you want to duplicate the canvas: {Name}?", "Yes", "No")) {
+                PixelPainterEditor_CanvasData _copy = new PixelPainterEditor_CanvasData(Name + "_Copy", CanvasWidth, CanvasHeight);
+                for (int pixel = 0; pixel < PixelsData.Pixels.Count; pixel++) {
+                    _copy.PixelsData.Pixels[pixel].Color = PixelsData.Pixels[pixel].Color;
+                }
+                PixelPainterEditorWindow.CachedPixelPainterEditorData.CanvasWindowData.Canvases.Add(_copy);
+            }
+        }
+
+        [Button()]
         public void DeleteCanvas() {
-            PixelPainterEditorWindow.CachedPixelPainterEditorData.CanvasWindowData.SelectedCanvasGuid = string.Empty;
-            PixelPainterEditorWindow.CachedPixelPainterEditorData.CanvasWindowData.CurrentCanvasGuid = string.Empty;
-            PixelPainterEditorWindow.CachedPixelPainterEditorData.CanvasWindowData.Canvases.Remove(this);
+            if (EditorUtility.DisplayDialog("Confirm", $"Are you sure you want to delete canvas: {Name}?", "Yes", "Cancel")) {
+                PixelPainterEditorWindow.CachedPixelPainterEditorData.CanvasWindowData.SelectedCanvasGuid = string.Empty;
+                PixelPainterEditorWindow.CachedPixelPainterEditorData.CanvasWindowData.CurrentCanvasGuid = string.Empty;
+                PixelPainterEditorWindow.CachedPixelPainterEditorData.CanvasWindowData.Canvases.Remove(this);
+            }
         }
 
         [Button()]

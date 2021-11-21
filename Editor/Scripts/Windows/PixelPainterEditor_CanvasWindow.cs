@@ -17,7 +17,7 @@ namespace LucasIndustries.PixelPainter.Editor {
         private static Vector2 lastInteractedPixelCoord;
         private static int mouseDragIndex = -1;
         private static bool isMouseDragged = false;
-        private enum ToolType { Pen, Erase };
+        private enum ToolType { Pen, Brush, MirrorH, MirrorV, MirrorHV, Erase, Fill, ReplaceFill, Lighten, Darken };
         private static ToolType currentSelectedTool = ToolType.Pen;
         private static bool editingPalette;
         private static Vector2 paletteScroll = Vector2.zero;
@@ -28,7 +28,7 @@ namespace LucasIndustries.PixelPainter.Editor {
         #endregion
 
         #region Callback Methods
-       
+
         #endregion
 
         #region Static Methods
@@ -168,7 +168,7 @@ namespace LucasIndustries.PixelPainter.Editor {
                         }
                         PixelPainterEditor_CanvasData _data = new PixelPainterEditor_CanvasData(GetCanvasWindowData().NewCanvasName, GetCanvasWindowData().NewCanvasWidth, GetCanvasWindowData().NewCanvasHeight);
                         GetCanvasWindowData().Canvases.Add(_data);
-                        GetCanvasWindowData().ResetNewCanvasData();
+                        GetCanvasWindowData().ResetSplashData();
                         GetCanvasWindowData().SelectedCanvasGuid = _data.Guid;
                         GetCanvasWindowData().CurrentCanvasGuid = _data.Guid;
                         GUI.FocusControl(null);
@@ -187,13 +187,26 @@ namespace LucasIndustries.PixelPainter.Editor {
                                 EditorGUILayout.LabelField("~ None exist ~", GetSkinStyle("CanvasWindowSplashLabelCanvasesEmpty"), GUILayout.ExpandWidth(true));
                             } else {
                                 for (int i = 0; i < GetCanvasWindowData().Canvases.Count; i++) {
-                                    if (!string.IsNullOrEmpty(GetCanvasWindowData().Canvases[i].Guid)) {
-                                        if (GUILayout.Button(GetCanvasWindowData().Canvases[i].Name, GetCanvasWindowData().SelectedCanvasGuid == GetCanvasWindowData().Canvases[i].Guid ? GetSkinStyle("CanvasWindowSplashButtonCanvasesSelected") : GetSkinStyle("CanvasWindowSplashButtonCanvases"), GUILayout.ExpandWidth(true), GUILayout.Height(30))) {
-                                            GetCanvasWindowData().SelectedCanvasGuid = GetCanvasWindowData().Canvases[i].Guid;
+                                    EditorGUILayout.BeginHorizontal();
+                                    {
+                                        if (!string.IsNullOrEmpty(GetCanvasWindowData().Canvases[i].Guid)) {
+                                            if (GUILayout.Button(GetCanvasWindowData().Canvases[i].Name, GetCanvasWindowData().SelectedCanvasGuid == GetCanvasWindowData().Canvases[i].Guid ? GetSkinStyle("CanvasWindowSplashButtonCanvasesSelected") : GetSkinStyle("CanvasWindowSplashButtonCanvases"), GUILayout.ExpandWidth(true), GUILayout.Height(30))) {
+                                                GetCanvasWindowData().SelectedCanvasGuid = GetCanvasWindowData().Canvases[i].Guid;
+                                            }
+                                        } else {
+                                            EditorGUILayout.LabelField("Guid Invalid!", GetSkinStyle("CanvasWindowSplashLabelCanvasesError"), GUILayout.ExpandWidth(true));
                                         }
-                                    } else {
-                                        EditorGUILayout.LabelField("Guid Invalid!", GetSkinStyle("CanvasWindowSplashLabelCanvasesError"), GUILayout.ExpandWidth(true));
+                                        GUILayout.Space(4);
+                                        if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_Duplicate"), "Duplicate"), GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(30), GUILayout.Height(30))) {
+                                            GetCanvasWindowData().Canvases[i].DuplicateCanvas();
+                                        }
+                                        GUILayout.Space(4);
+                                        if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_Delete"), "Delete"), GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(30), GUILayout.Height(30))) {
+                                            GetCanvasWindowData().Canvases[i].DeleteCanvas();
+                                        }
+                                        GUILayout.Space(4);
                                     }
+                                    EditorGUILayout.EndHorizontal();
                                     if (i < GetCanvasWindowData().Canvases.Count - 1) {
                                         GUILayout.Space(4);
                                     }
@@ -207,7 +220,8 @@ namespace LucasIndustries.PixelPainter.Editor {
                     GUILayout.Space(6);
                     if (GUILayout.Button("Select", (!string.IsNullOrEmpty(GetCanvasWindowData().SelectedCanvasGuid) ? GetSkinStyle("CanvasWindowSplashButtonSelect") : GetSkinStyle("CanvasWindowSplashButtonSelectEmpty")))) {
                         if (!string.IsNullOrEmpty(GetCanvasWindowData().SelectedCanvasGuid)) {
-                            GetCanvasWindowData().ResetNewCanvasData();
+                            GetCanvasWindowData().ResetSplashData();
+                            GetCanvasData(GetCanvasWindowData().SelectedCanvasGuid).PixelsData.RebuildCachedTextures(GetEditorData().CanvasPixelSize, GetEditorData().CanvasPixelSize);
                             GetCanvasWindowData().CurrentCanvasGuid = GetCanvasWindowData().SelectedCanvasGuid;
                         }
                     }
@@ -241,8 +255,8 @@ namespace LucasIndustries.PixelPainter.Editor {
                             currentSelectedTool = ToolType.Pen;
                         }
                         GUILayout.Space(6);
-                        if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Brush"), GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
-
+                        if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_Brush"), "Brush"), currentSelectedTool == ToolType.Brush ? ("CanvasWindowPainterSidePanelToolButtonActive") : GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                            currentSelectedTool = ToolType.Brush;
                         }
                         GUILayout.FlexibleSpace();
                     }
@@ -251,10 +265,12 @@ namespace LucasIndustries.PixelPainter.Editor {
                     EditorGUILayout.BeginHorizontal();
                     {
                         GUILayout.FlexibleSpace();
-                        if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Mirror Horizontal"), GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                        if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_MirrorH"), "Mirror Horizontal"), currentSelectedTool == ToolType.MirrorH ? ("CanvasWindowPainterSidePanelToolButtonActive") : GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                            currentSelectedTool = ToolType.MirrorH;
                         }
                         GUILayout.Space(6);
-                        if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Mirror Vertial"), GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                        if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_MirrorV"), "Mirror Vertial"), currentSelectedTool == ToolType.MirrorV ? ("CanvasWindowPainterSidePanelToolButtonActive") : GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                            currentSelectedTool = ToolType.MirrorV;
                         }
                         GUILayout.FlexibleSpace();
                     }
@@ -263,35 +279,26 @@ namespace LucasIndustries.PixelPainter.Editor {
                     EditorGUILayout.BeginHorizontal();
                     {
                         GUILayout.FlexibleSpace();
-                        if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Fill"), GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                        if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_MirrorHV"), "Mirror HV"), currentSelectedTool == ToolType.MirrorHV ? ("CanvasWindowPainterSidePanelToolButtonActive") : GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                            currentSelectedTool = ToolType.MirrorHV;
                         }
                         GUILayout.Space(6);
-                        if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Fill Color"), GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
-                        }
-                        GUILayout.FlexibleSpace();
-                    }
-                    EditorGUILayout.EndHorizontal();
-                    GUILayout.Space(6);
-                    EditorGUILayout.BeginHorizontal();
-                    {
-                        GUILayout.FlexibleSpace();
-                        if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Lighten"), GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
-                        }
-                        GUILayout.Space(6);
-                        if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Darken"), GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
-                        }
-                        GUILayout.FlexibleSpace();
-                    }
-                    EditorGUILayout.EndHorizontal();
-                    GUILayout.Space(6);
-                    EditorGUILayout.BeginHorizontal();
-                    {
-                        GUILayout.FlexibleSpace();
                         if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_Erase"), "Erase"), currentSelectedTool == ToolType.Erase ? ("CanvasWindowPainterSidePanelToolButtonActive") : GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
                             currentSelectedTool = ToolType.Erase;
                         }
+                        GUILayout.FlexibleSpace();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                    GUILayout.Space(6);
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        GUILayout.FlexibleSpace();
+                        if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_Fill"), "Fill"), currentSelectedTool == ToolType.Fill ? ("CanvasWindowPainterSidePanelToolButtonActive") : GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                            currentSelectedTool = ToolType.Fill;
+                        }
                         GUILayout.Space(6);
-                        if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Select"), GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                        if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_ReplaceFill"), "Replace Color"), currentSelectedTool == ToolType.ReplaceFill ? ("CanvasWindowPainterSidePanelToolButtonActive") : GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                            currentSelectedTool = ToolType.ReplaceFill;
                         }
                         GUILayout.FlexibleSpace();
                     }
@@ -300,10 +307,12 @@ namespace LucasIndustries.PixelPainter.Editor {
                     EditorGUILayout.BeginHorizontal();
                     {
                         GUILayout.FlexibleSpace();
-                        if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Pick Color"), GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                        if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_Lighten"), "Lighten"), currentSelectedTool == ToolType.Lighten ? ("CanvasWindowPainterSidePanelToolButtonActive") : GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                            currentSelectedTool = ToolType.Lighten;
                         }
                         GUILayout.Space(6);
-                        if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Move"), GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                        if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_Darken"), "Darken"), currentSelectedTool == ToolType.Darken ? ("CanvasWindowPainterSidePanelToolButtonActive") : GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                            currentSelectedTool = ToolType.Darken;
                         }
                         GUILayout.FlexibleSpace();
                     }
@@ -322,9 +331,9 @@ namespace LucasIndustries.PixelPainter.Editor {
                     EditorGUILayout.BeginHorizontal();
                     {
                         GUILayout.FlexibleSpace();
-                        GetCanvasData(GetCanvasWindowDataGuid()).PrimaryPaintColor = EditorGUILayout.ColorField(new GUIContent(""), GetCanvasData(GetCanvasWindowDataGuid()).PrimaryPaintColor, true, false, false, GUILayout.Width(32), GUILayout.Height(32));
+                        GetCanvasData(GetCanvasWindowDataGuid()).PrimaryPaintColor = EditorGUILayout.ColorField(new GUIContent("", "Primary"), GetCanvasData(GetCanvasWindowDataGuid()).PrimaryPaintColor, true, false, false, GUILayout.Width(32), GUILayout.Height(32));
                         GUILayout.Space(6);
-                        GetCanvasData(GetCanvasWindowDataGuid()).SecondaryPaintColor = EditorGUILayout.ColorField(new GUIContent(""), GetCanvasData(GetCanvasWindowDataGuid()).SecondaryPaintColor, true, false, false, GUILayout.Width(32), GUILayout.Height(32));
+                        GetCanvasData(GetCanvasWindowDataGuid()).SecondaryPaintColor = EditorGUILayout.ColorField(new GUIContent("", "Secondary"), GetCanvasData(GetCanvasWindowDataGuid()).SecondaryPaintColor, true, false, false, GUILayout.Width(32), GUILayout.Height(32));
                         GUILayout.FlexibleSpace();
                     }
                     EditorGUILayout.EndHorizontal();
@@ -342,11 +351,11 @@ namespace LucasIndustries.PixelPainter.Editor {
                     EditorGUILayout.BeginHorizontal();
                     {
                         GUILayout.FlexibleSpace();
-                        if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_Back"), "Clear All"), GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                        if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_ClearAll"), "Clear All"), GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
                             GetCanvasData(GetCanvasWindowDataGuid()).PixelsData.ClearAllPixels();
                         }
                         GUILayout.Space(6);
-                        if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_Back"), "Fill All"), GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                        if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_FillAll"), "Fill All"), GetSkinStyle("CanvasWindowPainterSidePanelToolButton"), GUILayout.Width(32), GUILayout.Height(32))) {
                             GetCanvasData(GetCanvasWindowDataGuid()).PixelsData.FillAllPixels(GetCanvasData(GetCanvasWindowDataGuid()).PrimaryPaintColor, GetEditorData().CanvasPixelSize, GetEditorData().CanvasPixelSize);
                         }
                         GUILayout.FlexibleSpace();
@@ -389,6 +398,28 @@ namespace LucasIndustries.PixelPainter.Editor {
             {
                 EditorGUILayout.BeginVertical();
                 {
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        GUILayout.FlexibleSpace();
+                        EditorGUILayout.LabelField("Canvas Name", GetSkinStyle("CanvasWindowPainterCanvasNameParam"), GUILayout.Width(200), GUILayout.Height(24));
+                        GUILayout.FlexibleSpace();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                    GUILayout.Space(-4);
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        GUILayout.FlexibleSpace();
+                        if (GetCanvasData(GetCanvasWindowDataGuid()) != null) {
+                            GetCanvasData(GetCanvasWindowDataGuid()).Name = EditorGUILayout.TextField(GetCanvasData(GetCanvasWindowDataGuid()).Name, GetSkinStyle("CanvasWindowPainterCanvasNameField"), GUILayout.Width(200), GUILayout.Height(18));
+                        }
+                        GUILayout.FlexibleSpace();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                EditorGUILayout.EndVertical();
+
+                EditorGUILayout.BeginVertical();
+                {
                     GUILayout.FlexibleSpace();
                     EditorGUILayout.BeginHorizontal();
                     {
@@ -415,10 +446,10 @@ namespace LucasIndustries.PixelPainter.Editor {
                                             if (_pixelInfo != null) {
                                                 if (GUILayout.Button(_pixelInfo.CachedTexture != null ? new GUIContent(_pixelInfo.CachedTexture) : new GUIContent(""), _pixelInfo.CachedTexture != null ? GetSkinStyle("CanvasWindowPainterPixelFilled") : _xStyle, GUILayout.Width(GetEditorData().CanvasPixelSize), GUILayout.Height(GetEditorData().CanvasPixelSize))) {
                                                     if (e.button == 0) {
-                                                        _pixelInfo.PaintPixel(currentSelectedTool == ToolType.Erase ? Color.clear : GetCanvasData(GetCanvasWindowDataGuid()).PrimaryPaintColor, GetEditorData().CanvasPixelSize, GetEditorData().CanvasPixelSize);
+                                                        CanvasInteracted(_pixelInfo, 0);
                                                         lastInteractedPixelCoord = new Vector2(x, y);
                                                     } else if (e.button == 1) {
-                                                        _pixelInfo.PaintPixel(currentSelectedTool == ToolType.Erase ? Color.clear : GetCanvasData(GetCanvasWindowDataGuid()).SecondaryPaintColor, GetEditorData().CanvasPixelSize, GetEditorData().CanvasPixelSize);
+                                                        CanvasInteracted(_pixelInfo, 1);
                                                         lastInteractedPixelCoord = new Vector2(x, y);
                                                     }
                                                 }
@@ -427,10 +458,10 @@ namespace LucasIndustries.PixelPainter.Editor {
                                                     if (lastInteractedPixelCoord != new Vector2(x, y)) {
                                                         if (isMouseDragged) {
                                                             if (mouseDragIndex == 0) {
-                                                                _pixelInfo.PaintPixel(currentSelectedTool == ToolType.Erase ? Color.clear : GetCanvasData(GetCanvasWindowDataGuid()).PrimaryPaintColor, GetEditorData().CanvasPixelSize, GetEditorData().CanvasPixelSize);
+                                                                CanvasInteracted(_pixelInfo, 0);
                                                                 lastInteractedPixelCoord = new Vector2(x, y);
                                                             } else if (mouseDragIndex == 1) {
-                                                                _pixelInfo.PaintPixel(currentSelectedTool == ToolType.Erase ? Color.clear : GetCanvasData(GetCanvasWindowDataGuid()).SecondaryPaintColor, GetEditorData().CanvasPixelSize, GetEditorData().CanvasPixelSize);
+                                                                CanvasInteracted(_pixelInfo, 1);
                                                                 lastInteractedPixelCoord = new Vector2(x, y);
                                                             }
                                                         }
@@ -454,68 +485,48 @@ namespace LucasIndustries.PixelPainter.Editor {
             EditorGUILayout.EndScrollView();
         }
 
+        private static void CanvasInteracted(PixelPainterEditor_CanvasPixelsData.PixelInfo pixelInfo, int mouseButton) {
+            switch (currentSelectedTool) {
+                case ToolType.Pen:
+                    if (mouseButton == 0) {
+                        pixelInfo.PaintPixel(GetCanvasData(GetCanvasWindowDataGuid()).PrimaryPaintColor, GetEditorData().CanvasPixelSize, GetEditorData().CanvasPixelSize);
+                    } else if (mouseButton == 1) {
+                        pixelInfo.PaintPixel(GetCanvasData(GetCanvasWindowDataGuid()).SecondaryPaintColor, GetEditorData().CanvasPixelSize, GetEditorData().CanvasPixelSize);
+                    }
+                    break;
+                case ToolType.Brush:
+
+                    break;
+                case ToolType.MirrorH:
+
+                    break;
+                case ToolType.MirrorV:
+
+                    break;
+                case ToolType.MirrorHV:
+
+                    break;
+                case ToolType.Erase:
+                    pixelInfo.PaintPixel(Color.clear, GetEditorData().CanvasPixelSize, GetEditorData().CanvasPixelSize);
+                    break;
+                case ToolType.Fill:
+
+                    break;
+                case ToolType.ReplaceFill:
+
+                    break;
+                case ToolType.Lighten:
+
+                    break;
+                case ToolType.Darken:
+
+                    break;
+            }
+        }
+
         private static void DrawRightCanvasGUI() {
             EditorGUILayout.BeginVertical(GetSkinStyle("CanvasWindowPainterSidePanel"), GUILayout.Width(210), GUILayout.ExpandHeight(true));
             {
-                EditorGUILayout.BeginHorizontal();
-                {
-                    GUILayout.FlexibleSpace();
-                    EditorGUILayout.BeginVertical();
-                    {
-                        if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, ""), GetSkinStyle("Backdrop"), GUILayout.ExpandWidth(true), GUILayout.Height(220))) {
-
-                        }
-                        GUILayout.Space(6);
-                        EditorGUILayout.BeginVertical(GetSkinStyle("CanvasWindowPainterSidePanelContainer"), GUILayout.ExpandWidth(true));
-                        {
-                            EditorGUILayout.BeginVertical(GetSkinStyle("CanvasWindowPainterSidePanelTitleBox"), GUILayout.ExpandWidth(true), GUILayout.Height(18));
-                            {
-                                EditorGUILayout.LabelField("Layers", GetSkinStyle("CanvasWindowPainterSidePanelTitleLabel"), GUILayout.ExpandWidth(true), GUILayout.Height(18));
-                            }
-                            EditorGUILayout.EndVertical();
-                            GUILayout.Space(6);
-                            EditorGUILayout.BeginHorizontal();
-                            {
-                                GUILayout.Space(4);
-                                if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Create"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(20), GUILayout.Height(20))) {
-
-                                }
-                                GUILayout.Space(4);
-                                if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Move Up"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(20), GUILayout.Height(20))) {
-
-                                }
-                                GUILayout.Space(4);
-                                if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Move Down"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(20), GUILayout.Height(20))) {
-
-                                }
-                                GUILayout.Space(4);
-                                if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Delete"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(20), GUILayout.Height(20))) {
-
-                                }
-                            }
-                            EditorGUILayout.EndHorizontal();
-                            GUILayout.Space(4);
-                            // TODO: Loop canvas layers here
-                            EditorGUILayout.BeginHorizontal();
-                            {
-                                GUILayout.Space(4);
-                                // TODO: Make the rename button toggle renaming state for iterated layer, else use a LabelField
-                                EditorGUILayout.TextField("", GUILayout.ExpandWidth(true), GUILayout.Height(20));
-                                if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Rename"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(20), GUILayout.Height(20))) {
-
-                                }
-                                GUILayout.Space(4);
-                            }
-                            EditorGUILayout.EndHorizontal();
-                            GUILayout.Space(6);
-                        }
-                        EditorGUILayout.EndVertical();
-                    }
-                    EditorGUILayout.EndVertical();
-                    GUILayout.FlexibleSpace();
-                }
-                EditorGUILayout.EndHorizontal();
-                GUILayout.Space(12);
                 EditorGUILayout.BeginHorizontal();
                 {
                     GUILayout.FlexibleSpace();
@@ -532,23 +543,44 @@ namespace LucasIndustries.PixelPainter.Editor {
                             EditorGUILayout.BeginHorizontal();
                             {
                                 GUILayout.Space(4);
-                                if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Flip Horizontal"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                                if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_FlipH"), "Flip Horizontal"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(32), GUILayout.Height(32))) {
 
                                 }
                                 GUILayout.Space(4);
-                                if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Flip Vertical"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                                if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_FlipV"), "Flip Vertical"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(32), GUILayout.Height(32))) {
 
                                 }
                                 GUILayout.Space(4);
-                                if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Rotate Left"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                                if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_RotateL"), "Rotate Left"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(32), GUILayout.Height(32))) {
 
                                 }
                                 GUILayout.Space(4);
-                                if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Rotate Right"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                                if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_RotateR"), "Rotate Right"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(32), GUILayout.Height(32))) {
 
                                 }
                                 GUILayout.Space(4);
-                                if (GUILayout.Button(new GUIContent(Texture2D.whiteTexture, "Center"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+                                if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_Center"), "Center"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+
+                                }
+                            }
+                            EditorGUILayout.EndHorizontal();
+                            GUILayout.Space(4);
+                            EditorGUILayout.BeginHorizontal();
+                            {
+                                GUILayout.Space(4);
+                                if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_MoveUp"), "Move Up"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+
+                                }
+                                GUILayout.Space(4);
+                                if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_MoveDown"), "Move Down"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+
+                                }
+                                GUILayout.Space(4);
+                                if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_MoveLeft"), "Move Left"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(32), GUILayout.Height(32))) {
+
+                                }
+                                GUILayout.Space(4);
+                                if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_MoveRight"), "Move Right"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(32), GUILayout.Height(32))) {
 
                                 }
                             }
@@ -601,7 +633,7 @@ namespace LucasIndustries.PixelPainter.Editor {
                                     }
                                     GUILayout.Space(4);
                                     if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_Delete"), "Delete"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(20), GUILayout.Height(20))) {
-                                        GetEditorData().Palettes.RemoveAt(GetCanvasData(GetCanvasWindowDataGuid()).SelectedPalette);
+                                        GetEditorData().Palettes[GetCanvasData(GetCanvasWindowDataGuid()).SelectedPalette].DeletePalette();
                                     }
                                 }
                                 GUILayout.Space(4);
@@ -617,9 +649,9 @@ namespace LucasIndustries.PixelPainter.Editor {
                                         if (GetCanvasData(GetCanvasWindowDataGuid()) != null) {
                                             if (i == GetCanvasData(GetCanvasWindowDataGuid()).SelectedPalette) {
                                                 for (int c = 0; c < GetEditorData().Palettes[i].Colors.Count; c++) {
-                                                    EditorGUILayout.BeginHorizontal(GUILayout.Width(38), GUILayout.Height(32));
+                                                    EditorGUILayout.BeginHorizontal(GUILayout.Width(48), GUILayout.Height(32));
                                                     {
-                                                        GetEditorData().Palettes[i].Colors[c] = EditorGUILayout.ColorField(new GUIContent(""), GetEditorData().Palettes[i].Colors[c], false, false, false, GUILayout.Width(26), GUILayout.Height(26));
+                                                        GetEditorData().Palettes[i].Colors[c] = EditorGUILayout.ColorField(new GUIContent(""), GetEditorData().Palettes[i].Colors[c], true, false, false, GUILayout.Width(36), GUILayout.Height(26));
                                                         GUILayout.Space(-4);
                                                         if (GUILayout.Button(new GUIContent("x"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(12), GUILayout.Height(12))) {
                                                             GetEditorData().Palettes[i].Colors.RemoveAt(c);
@@ -663,7 +695,7 @@ namespace LucasIndustries.PixelPainter.Editor {
                 EditorGUILayout.BeginHorizontal();
                 {
                     GUILayout.FlexibleSpace();
-                    EditorGUILayout.LabelField($"Mouse Tile: {lastHoveredPixelCoord.x}.{lastHoveredPixelCoord.y}", GetSkinStyle("CanvasWindowPainterSidePanelCenterLabel"));
+                    EditorGUILayout.LabelField($"Mouse Tile: {lastHoveredPixelCoord.x + 1}.{lastHoveredPixelCoord.y + 1}", GetSkinStyle("CanvasWindowPainterSidePanelCenterLabel"));
                     GUILayout.FlexibleSpace();
                 }
                 EditorGUILayout.EndHorizontal();

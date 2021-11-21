@@ -6,40 +6,47 @@ using UnityEngine;
 using UnityEditor;
 
 namespace LucasIndustries.PixelPainter.Editor {
-	[Serializable]
-	public class PixelPainterEditor_PaletteData {
-		#region Public/Private Variables
-		public string Guid;
-		public string Name;
-		public List<Color> Colors = new List<Color>();
-		#endregion
+    [Serializable]
+    public class PixelPainterEditor_PaletteData {
+        #region Public/Private Variables
+        public string Guid;
+        public string Name;
+        public List<Color> Colors = new List<Color>();
+        #endregion
 
-		#region Runtime Variables
+        #region Runtime Variables
 
-		#endregion
+        #endregion
 
-		#region Native Methods
+        #region Native Methods
 
-		#endregion
+        #endregion
 
-		#region Callback Methods
+        #region Callback Methods
 
-		#endregion
+        #endregion
 
-		#region Static Methods
+        #region Static Methods
 
-		#endregion
+        #endregion
 
-		#region Public Methods
-		public PixelPainterEditor_PaletteData(string name) {
-			Guid = System.Guid.NewGuid().ToString();
-			Name = name;
-			Colors.Add(new Color(1, 1, 1));
-		}
-		#endregion
+        #region Public Methods
+        public PixelPainterEditor_PaletteData(string name) {
+            Guid = System.Guid.NewGuid().ToString();
+            Name = name;
+            Colors.Add(new Color(1, 1, 1));
+        }
 
-		#region Private Methods
+        public void DeletePalette() {
+            if (EditorUtility.DisplayDialog("Confirm", $"Are you sure you want to delete palette: {Name}?", "Yes", "No")) {
+                PixelPainterEditorWindow.CachedPixelPainterEditorData.Palettes.Remove(this);
 
-		#endregion
-	}
+            }
+        }
+        #endregion
+
+        #region Private Methods
+
+        #endregion
+    }
 }

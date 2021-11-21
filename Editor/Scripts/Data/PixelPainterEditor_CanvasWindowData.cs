@@ -34,10 +34,12 @@ namespace LucasIndustries.PixelPainter.Editor {
 		#endregion
 
 		#region Public Methods
-		public void ResetNewCanvasData() {
+		public void ResetSplashData() {
 			NewCanvasName = string.Empty;
 			NewCanvasWidth = 0;
 			NewCanvasHeight = 0;
+			ExistingCanvasesScroll = Vector2.zero;
+			CurrentCanvasScroll = Vector2.zero;
 		}
 		#endregion
 

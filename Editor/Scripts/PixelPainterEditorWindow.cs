@@ -55,7 +55,7 @@ namespace LucasIndustries.PixelPainter.Editor {
 			if (state == PlayModeStateChange.EnteredEditMode || state == PlayModeStateChange.EnteredPlayMode) {
 				for (int i = 0; i < PixelPainterEditor_CanvasWindow.GetCanvasData(PixelPainterEditor_CanvasWindow.GetCanvasWindowDataGuid()).PixelsData.Pixels.Count; i++) {
 					if (PixelPainterEditor_CanvasWindow.GetCanvasData(PixelPainterEditor_CanvasWindow.GetCanvasWindowDataGuid()).PixelsData.Pixels[i].Color.a != 0) {
-						PixelPainterEditor_CanvasWindow.GetCanvasData(PixelPainterEditor_CanvasWindow.GetCanvasWindowDataGuid()).PixelsData.Pixels[i].PaintPixel(PixelPainterEditor_CanvasWindow.GetCanvasData(PixelPainterEditor_CanvasWindow.GetCanvasWindowDataGuid()).PixelsData.Pixels[i].Color, CachedPixelPainterEditorData.CanvasPixelSize, CachedPixelPainterEditorData.CanvasPixelSize);
+						PixelPainterEditor_CanvasWindow.GetCanvasData(PixelPainterEditor_CanvasWindow.GetCanvasWindowDataGuid()).PixelsData.Pixels[i].PaintPixel(PixelPainterEditor_CanvasWindow.GetCanvasData(PixelPainterEditor_CanvasWindow.GetCanvasWindowDataGuid()).PixelsData.Pixels[i].Color);
 					}
 				}
 			}
@@ -67,7 +67,6 @@ namespace LucasIndustries.PixelPainter.Editor {
 		public static void OpenEditor() {
 			PixelPainterEditorWindow _window = GetWindow<PixelPainterEditorWindow>(true);
 			_window.minSize = new Vector2(852, 592);
-			_window.maxSize = new Vector2(852, 592);
 			_window.titleContent = new GUIContent("Lucas Industries - Pixel Painter", Resources.Load<Texture2D>("Ed_Pen"));
 			_window.Show();
 			CacheEditorData();

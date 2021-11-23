@@ -16,14 +16,13 @@ namespace LucasIndustries.PixelPainter.Editor {
             public Color Color;
             public Texture2D CachedTexture;
 
-            public void PaintPixel(Color color, int textureWidth, int textureHeight) {
+            public void PaintPixel(Color color) {
                 Color = color;
                 if (Color.a != 0) {
                     if (CachedTexture == null) {
-                        CachedTexture = new Texture2D(textureWidth, textureHeight);
+                        CachedTexture = new Texture2D(1, 1);
                     }
-                    Color[] _colors = Enumerable.Repeat(Color, textureWidth * textureHeight).ToArray();
-                    CachedTexture.SetPixels(_colors);
+                    CachedTexture.SetPixel(0, 0, Color);
                     CachedTexture.Apply();
                 } else {
                     Color = new Color(1, 1, 1, 0);
@@ -66,10 +65,18 @@ namespace LucasIndustries.PixelPainter.Editor {
             }
         }
 
-        public void RebuildCachedTextures(int textureWidth, int textureHeight) {
+        public void SetAndApplyCachedTexturePixels(PixelInfo pixelInfo) {
+            if (pixelInfo.CachedTexture != null) {
+                Color[] _colors = Enumerable.Repeat(pixelInfo.Color, pixelInfo.CachedTexture.width * pixelInfo.CachedTexture.height).ToArray();
+                pixelInfo.CachedTexture.SetPixels(_colors);
+                pixelInfo.CachedTexture.Apply();
+            }
+        }
+
+        public void RebuildCachedTextures() {
             for (int i = 0; i < Pixels.Count; i++) {
                 if (Pixels[i].CachedTexture == null) {
-                    Pixels[i].PaintPixel(Pixels[i].Color, textureWidth, textureHeight);
+                    Pixels[i].PaintPixel(Pixels[i].Color);
                 }
             }
         }
@@ -85,10 +92,10 @@ namespace LucasIndustries.PixelPainter.Editor {
             }
         }
 
-        public void FillAllPixels(Color color, int textureWidth, int textureHeight) {
+        public void FillAllPixels(Color color) {
             if (EditorUtility.DisplayDialog("Confirm", "Are you sure you want to fill all tiles with the primary color?", "Yes", "No")) {
                 for (int i = 0; i < Pixels.Count; i++) {
-                    Pixels[i].PaintPixel(color, textureWidth, textureHeight);
+                    Pixels[i].PaintPixel(color);
                 }
             }
         }

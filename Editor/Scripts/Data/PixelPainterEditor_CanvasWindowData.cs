@@ -7,9 +7,9 @@ namespace LucasIndustries.PixelPainter.Editor {
 	[Serializable]
 	public class PixelPainterEditor_CanvasWindowData {
 		#region Public/Private Variables
-		public string NewCanvasName = "New Canvas";
-		public int NewCanvasWidth = 2;
-		public int NewCanvasHeight = 2;
+		public string NewCanvasName;
+		public int NewCanvasWidth;
+		public int NewCanvasHeight;
 		public List<PixelPainterEditor_CanvasData> Canvases = new List<PixelPainterEditor_CanvasData>();
 		public Vector2 ExistingCanvasesScroll = Vector2.zero;
 		public string SelectedCanvasGuid;
@@ -38,7 +38,6 @@ namespace LucasIndustries.PixelPainter.Editor {
 			NewCanvasName = string.Empty;
 			NewCanvasWidth = 0;
 			NewCanvasHeight = 0;
-			ExistingCanvasesScroll = Vector2.zero;
 			CurrentCanvasScroll = Vector2.zero;
 		}
 

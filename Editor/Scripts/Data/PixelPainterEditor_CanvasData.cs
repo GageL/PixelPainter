@@ -15,8 +15,8 @@ namespace LucasIndustries.PixelPainter.Editor {
         public int CanvasWidth;
         public int CanvasHeight;
         public PixelPainterEditor_CanvasPixelsData PixelsData;
-        public Color PrimaryPaintColor = Color.white;
-        public Color SecondaryPaintColor = Color.black;
+        public Color PrimaryPaintColor = Color.blue;
+        public Color SecondaryPaintColor = Color.red;
         public int SelectedPalette;
         #endregion
 

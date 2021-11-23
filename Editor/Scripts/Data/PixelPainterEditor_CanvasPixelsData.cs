@@ -92,6 +92,15 @@ namespace LucasIndustries.PixelPainter.Editor {
             }
         }
 
+        public void HardClearAllPixels() {
+            for (int i = 0; i < Pixels.Count; i++) {
+                Pixels[i].Color = new Color(1, 1, 1, 0);
+                if (Pixels[i].CachedTexture != null) {
+                    Pixels[i].CachedTexture = null;
+                }
+            }
+        }
+
         public void FillAllPixels(Color color) {
             if (EditorUtility.DisplayDialog("Confirm", "Are you sure you want to fill all tiles with the primary color?", "Yes", "No")) {
                 for (int i = 0; i < Pixels.Count; i++) {

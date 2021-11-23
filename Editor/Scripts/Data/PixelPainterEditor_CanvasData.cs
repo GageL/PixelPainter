@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEditor;
+using System.Linq;
 
 namespace LucasIndustries.PixelPainter.Editor {
     [Serializable]
@@ -99,6 +100,51 @@ namespace LucasIndustries.PixelPainter.Editor {
                     }
                 }
             }
+        }
+
+        public void ImportFromPNG() {
+            string _path = EditorUtility.OpenFilePanel("Select File", Application.dataPath, "png");
+            //Debug.Log(_path);
+            if (!string.IsNullOrEmpty(_path)) {
+                Texture2D _tex = null;
+                byte[] fileData;
+                if (File.Exists(_path)) {
+                    fileData = File.ReadAllBytes(_path);
+                    _tex = new Texture2D(1, 1);
+                    _tex.LoadImage(fileData);
+                    if (_tex.width <= CanvasWidth && _tex.height <= CanvasHeight) {
+                        PixelsData.ClearAllPixels();
+                        for (int y = 0; y < _tex.height; y++) {
+                            for (int x = 0; x < _tex.width; x++) {
+                                PixelsData.Pixels.FirstOrDefault(p => p.XPixelPosition == x && p.YPixelPosition == y).Color = _tex.GetPixel(x, y);
+                            }
+                        }
+                        PixelsData.RebuildCachedTextures();
+                    } else {
+                        EditorUtility.DisplayDialog("Error", "Cannot load a texture that is larger than the current canvas", "Close");
+                    }
+                }
+            }
+        }
+
+        public void FlipCanvasVertically() {
+            List<PixelPainterEditor_CanvasPixelsData.PixelInfo> _tmpPixels = new List<PixelPainterEditor_CanvasPixelsData.PixelInfo>();
+            foreach (var pixel in PixelsData.Pixels) {
+                _tmpPixels.Add(new PixelPainterEditor_CanvasPixelsData.PixelInfo() { XPixelPosition = pixel.XPixelPosition, YPixelPosition = ((CanvasHeight - 1) - pixel.YPixelPosition), Color = pixel.Color });
+            }
+            PixelsData.HardClearAllPixels();
+            PixelsData.Pixels = _tmpPixels;
+            PixelsData.RebuildCachedTextures();
+        }
+
+        public void FlipCanvasHorizontally() {
+            List<PixelPainterEditor_CanvasPixelsData.PixelInfo> _tmpPixels = new List<PixelPainterEditor_CanvasPixelsData.PixelInfo>();
+            foreach (var pixel in PixelsData.Pixels) {
+                _tmpPixels.Add(new PixelPainterEditor_CanvasPixelsData.PixelInfo() { XPixelPosition = ((CanvasWidth - 1) - pixel.XPixelPosition), YPixelPosition = pixel.YPixelPosition, Color = pixel.Color });
+            }
+            PixelsData.HardClearAllPixels();
+            PixelsData.Pixels = _tmpPixels;
+            PixelsData.RebuildCachedTextures();
         }
         #endregion
 

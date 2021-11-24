@@ -102,7 +102,35 @@ namespace LucasIndustries.PixelPainter.Editor {
             }
         }
 
-        public void ImportFromPNG() {
+        public Texture2D GetTextureFromPixels() {
+            List<Color> _colors = new List<Color>();
+            for (int i = 0; i < PixelsData.Pixels.Count; i++) {
+                _colors.Add(PixelsData.Pixels[i].Color);
+            }
+            if (_colors.Count > 0) {
+                // Create a texture the size of the canvas, RGB24 format
+                int width = CanvasWidth;
+                int height = CanvasHeight;
+                Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false) {
+                    wrapMode = TextureWrapMode.Clamp,
+                    filterMode = FilterMode.Point
+                };
+
+                // Read canvas contents into the texture
+                tex.SetPixels(_colors.ToArray());
+                tex.Apply();
+
+                // Need to flip right side up due to current pixel storage method
+                //tex = FlipTextureVertically(tex);
+
+                // Encode texture into PNG
+                byte[] bytes = tex.EncodeToPNG();
+                return tex;
+            }
+            return null;
+        }
+
+        public void ImportApplyPNGFromPath() {
             string _path = EditorUtility.OpenFilePanel("Select File", Application.dataPath, "png");
             //Debug.Log(_path);
             if (!string.IsNullOrEmpty(_path)) {
@@ -128,22 +156,30 @@ namespace LucasIndustries.PixelPainter.Editor {
         }
 
         public void FlipCanvasVertically() {
-            List<PixelPainterEditor_CanvasPixelsData.PixelInfo> _tmpPixels = new List<PixelPainterEditor_CanvasPixelsData.PixelInfo>();
+            PixelPainterEditor_CanvasPixelsData.PixelInfo[] _tmpPixels = new PixelPainterEditor_CanvasPixelsData.PixelInfo[CanvasWidth * CanvasHeight];
             foreach (var pixel in PixelsData.Pixels) {
-                _tmpPixels.Add(new PixelPainterEditor_CanvasPixelsData.PixelInfo() { XPixelPosition = pixel.XPixelPosition, YPixelPosition = ((CanvasHeight - 1) - pixel.YPixelPosition), Color = pixel.Color });
+                int _targetXPos = pixel.XPixelPosition;
+                int _targetYPos = ((CanvasHeight - 1) - pixel.YPixelPosition);
+                int _targetListIndex = PixelsData.Pixels.IndexOf(PixelsData.Pixels.FirstOrDefault(p => p.XPixelPosition == _targetXPos && p.YPixelPosition == _targetYPos));
+                _tmpPixels[_targetListIndex] = new PixelPainterEditor_CanvasPixelsData.PixelInfo() { XPixelPosition = _targetXPos, YPixelPosition = _targetYPos, Color = pixel.Color };
             }
+            
             PixelsData.HardClearAllPixels();
-            PixelsData.Pixels = _tmpPixels;
+            PixelsData.Pixels = _tmpPixels.ToList();
             PixelsData.RebuildCachedTextures();
         }
 
         public void FlipCanvasHorizontally() {
-            List<PixelPainterEditor_CanvasPixelsData.PixelInfo> _tmpPixels = new List<PixelPainterEditor_CanvasPixelsData.PixelInfo>();
+            PixelPainterEditor_CanvasPixelsData.PixelInfo[] _tmpPixels = new PixelPainterEditor_CanvasPixelsData.PixelInfo[CanvasWidth * CanvasHeight];
             foreach (var pixel in PixelsData.Pixels) {
-                _tmpPixels.Add(new PixelPainterEditor_CanvasPixelsData.PixelInfo() { XPixelPosition = ((CanvasWidth - 1) - pixel.XPixelPosition), YPixelPosition = pixel.YPixelPosition, Color = pixel.Color });
+                int _targetXPos = ((CanvasWidth - 1) - pixel.XPixelPosition);
+                int _targetYPos = pixel.YPixelPosition;
+                int _targetListIndex = PixelsData.Pixels.IndexOf(PixelsData.Pixels.FirstOrDefault(p => p.XPixelPosition == _targetXPos && p.YPixelPosition == _targetYPos));
+                _tmpPixels[_targetListIndex] = new PixelPainterEditor_CanvasPixelsData.PixelInfo() { XPixelPosition = _targetXPos, YPixelPosition = _targetYPos, Color = pixel.Color };
             }
+
             PixelsData.HardClearAllPixels();
-            PixelsData.Pixels = _tmpPixels;
+            PixelsData.Pixels = _tmpPixels.ToList();
             PixelsData.RebuildCachedTextures();
         }
         #endregion

@@ -190,6 +190,14 @@ namespace LucasIndustries.PixelPainter.Editor {
                             EditorUtility.DisplayDialog("Create Error", "The canvas must be 2 or more pixels tall", "Close");
                             return;
                         }
+                        if (!IsEvenNumber(GetCanvasWindowData().NewCanvasWidth) && !IsEvenNumber(GetCanvasWindowData().NewCanvasHeight)) {
+                            EditorUtility.DisplayDialog("Create Error", "The canvas must have even proportions", "Close");
+                            return;
+                        }
+                        if (GetCanvasWindowData().NewCanvasWidth > 32 || GetCanvasWindowData().NewCanvasHeight > 32) {
+                            EditorUtility.DisplayDialog("Create Error", "Max pixels per axis cannot exceed 32 pixels at this time", "Close");
+                            return;
+                        }
                         PixelPainterEditor_CanvasData _data = new PixelPainterEditor_CanvasData(GetCanvasWindowData().NewCanvasName, GetCanvasWindowData().NewCanvasWidth, GetCanvasWindowData().NewCanvasHeight);
                         GetCanvasWindowData().Canvases.Add(_data);
                         GetCanvasWindowData().ResetSplashData();

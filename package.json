@@ -1,6 +1,6 @@
 {
-    "name": "com.lucasindustries.pixelpainter",
-    "version": "1.0.0",
+    "name": "com.gagel.pixelpainter",
+    "version": "1.0.1",
     "displayName": "Pixel Painter",
     "description": "A pixel art tool for the Unity Editor where you can create, paint and edit pixel art on the fly and export to texture for use in game.",
     "unity": "2019.1",
@@ -17,8 +17,8 @@
       "paint"
     ],
     "author": {
-      "name": "Lucas Industries",
-      "email": "contact@lucasindustries.com",
+      "name": "Gage Lucas",
+      "email": "contact@gagelucas.me",
       "url": "https://github.com/GageL/PixelPainter.git"
     }
   }

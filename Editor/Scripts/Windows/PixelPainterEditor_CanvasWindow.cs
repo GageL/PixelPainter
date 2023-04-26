@@ -831,27 +831,6 @@ namespace LucasIndustries.PixelPainter.Editor {
                                                 }
                                             }
                                             EditorGUILayout.EndVertical();
-                                            //for (int c = 0; c < GetEditorData().Palettes[i].Colors.Count; c++) {
-                                            //    EditorGUILayout.BeginHorizontal(GUILayout.Width(48), GUILayout.Height(32));
-                                            //    {
-                                            //        GetEditorData().Palettes[i].Colors[c] = EditorGUILayout.ColorField(new GUIContent(""), GetEditorData().Palettes[i].Colors[c], true, false, false, GUILayout.Width(36), GUILayout.Height(26));
-                                            //        GUILayout.Space(-4);
-                                            //        if (GUILayout.Button(new GUIContent("x"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(12), GUILayout.Height(12))) {
-                                            //            if (GetEditorData().Palettes[i].Colors.Count == 1) {
-                                            //                GetEditorData().Palettes[i].Colors[c] = Color.white;
-                                            //            } else {
-                                            //                GetEditorData().Palettes[i].Colors.RemoveAt(c);
-                                            //            }
-                                            //        }
-                                            //    }
-                                            //    EditorGUILayout.EndHorizontal();
-                                            //    GUILayout.Space(4);
-                                            //    if (c == GetEditorData().Palettes[i].Colors.Count - 1) {
-                                            //        if (GUILayout.Button(new GUIContent(Resources.Load<Texture2D>("Ed_Add"), "Add"), GetSkinStyle("CanvasWindowPainterSidePanelContainerButton"), GUILayout.Width(24), GUILayout.Height(26))) {
-                                            //            GetEditorData().Palettes[i].Colors.Add(new Color(1, 1, 1));
-                                            //        }
-                                            //    }
-                                            //}
                                         }
                                     }
                                 }
